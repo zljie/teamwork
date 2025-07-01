@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团队工时管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>团队工时管理系统</h1>
+        </header>
+        
+        <!-- 顶部工具栏 -->
+        <div class="top-toolbar">
+            <div class="toolbar-section">
+                <div class="month-selector-group">
+                    <label for="monthSelector">选择年月:</label>
+                    <input type="month" id="monthSelector" class="month-selector">
+                </div>
+            </div>
+
+            <div class="toolbar-section">
+                <div class="management-group">
+                    <div class="management-item">
+                        <label>人员管理:</label>
+                        <div class="input-group-inline">
+                            <input type="text" id="personInput" placeholder="输入人员姓名" class="input-field-small">
+                            <button id="addPersonBtn" class="btn btn-primary btn-small">添加</button>
+                            <button id="batchImportPersonBtn" class="btn btn-info btn-small">批量导入</button>
+                        </div>
+                    </div>
+                    <div class="management-item">
+                        <label>项目管理:</label>
+                        <div class="input-group-inline">
+                            <input type="text" id="projectInput" placeholder="输入项目名称" class="input-field-small">
+                            <button id="addProjectBtn" class="btn btn-primary btn-small">添加</button>
+                            <button id="batchImportProjectBtn" class="btn btn-info btn-small">批量导入</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar-section">
+                <div class="batch-operations">
+                    <div class="batch-group">
+                        <label>批量绑定工时:</label>
+                        <div class="batch-controls">
+                            <div class="select-group">
+                                <label for="employeeTagSelector">选择员工（可多选）:</label>
+                                <div class="tag-selector" id="employeeTagSelector">
+                                    <div class="selected-tags" id="selectedEmployeeTags">
+                                        <span class="placeholder">点击选择员工...</span>
+                                    </div>
+                                    <div class="dropdown-content" id="employeeDropdown">
+                                        <!-- 员工选项将动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="select-group">
+                                <label for="batchProjectSelect">选择项目:</label>
+                                <select id="batchProjectSelect" class="select-field">
+                                    <option value="">请选择项目</option>
+                                </select>
+                            </div>
+                            <div class="button-group">
+                                <button id="batchBindAllBtn" class="btn btn-primary">绑定当月所有工时</button>
+                                <button id="batchBindWorkdaysBtn" class="btn btn-info">仅绑定工作日</button>
+                                <button id="debugBtn" class="btn btn-outline" onclick="timesheetManager.debugInfo()">调试信息</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar-section">
+                <div class="export-group">
+                    <button id="exportCsvBtn" class="btn btn-success">导出 CSV</button>
+                    <button id="exportJsonBtn" class="btn btn-success">导出 JSON</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工时表格区域 -->
+        <div class="table-area">
+            <div class="table-container">
+                <table id="timesheetTable" class="timesheet-table">
+                    <thead>
+                        <tr id="tableHeader">
+                            <th class="name-column">姓名</th>
+                            <!-- 日期列将动态生成 -->
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 表格内容将动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 人员和项目列表显示区域 -->
+        <div class="lists-panel">
+            <div class="list-section">
+                <h4>人员列表</h4>
+                <div id="personList" class="list-container-horizontal"></div>
+            </div>
+            <div class="list-section">
+                <h4>项目列表</h4>
+                <div id="projectList" class="list-container-horizontal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量导入模态框 -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">批量导入</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="import-tabs">
+                    <button class="tab-btn active" data-tab="text">文本输入</button>
+                    <button class="tab-btn" data-tab="file">文件上传</button>
+                </div>
+
+                <div id="textTab" class="tab-content active">
+                    <p>请输入要导入的内容，用逗号分隔：</p>
+                    <textarea id="importTextarea" placeholder="张三,李四,王五,赵六" rows="8"></textarea>
+                    <div class="import-help">
+                        <small>支持格式：用逗号分隔多个项目，例如：张三,李四,王五</small>
+                    </div>
+                </div>
+
+                <div id="fileTab" class="tab-content">
+                    <p>支持上传 .txt 或 .csv 文件：</p>
+                    <input type="file" id="importFile" accept=".txt,.csv" />
+                    <div id="filePreview" class="file-preview"></div>
+                    <div class="import-help">
+                        <small>文件内容应为逗号分隔的格式</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmImportBtn" class="btn btn-primary">确认导入</button>
+                <button id="cancelImportBtn" class="btn btn-secondary">取消</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

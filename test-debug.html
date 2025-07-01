@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试页面</title>
+</head>
+<body>
+    <h1>调试信息</h1>
+    <p>请打开浏览器开发者工具的控制台查看调试信息</p>
+    
+    <h2>测试步骤：</h2>
+    <ol>
+        <li>在主页面添加一些员工（如：张三、李四）</li>
+        <li>添加一些项目（如：项目A、项目B）</li>
+        <li>选择年月</li>
+        <li>在标签选择器中选择员工</li>
+        <li>选择项目</li>
+        <li>点击批量绑定按钮</li>
+        <li>查看控制台输出</li>
+    </ol>
+    
+    <h2>需要检查的调试信息：</h2>
+    <ul>
+        <li>selectedEmployees 是否包含选中的员工ID</li>
+        <li>projectId 是否正确获取</li>
+        <li>currentMonth 是否正确设置</li>
+        <li>批量更新循环是否执行</li>
+        <li>updateTimesheetData 是否被调用</li>
+        <li>表格刷新后数据是否正确设置</li>
+    </ul>
+    
+    <a href="/" style="font-size: 18px; color: blue;">返回主页面</a>
+</body>
+</html>
