@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "build": "echo 'No build step required for static files'",
-    "vercel-build": "echo 'No build step required'"
+    "vercel-build": "echo 'No build step required'",
+    "deploy": "vercel --prod",
+    "deploy-preview": "vercel"
   },
   "keywords": [
     "timesheet",
