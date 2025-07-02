@@ -18,33 +18,59 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
-            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
         }
-        
+
         .main-container {
-            padding: 20px;
+            padding: 30px;
             max-width: 1920px;
             margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
         
         .header-card {
-            margin-bottom: 20px;
-        }
-        
-        .header-title {
+            margin-bottom: 30px;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin: 0;
         }
-        
+
+        .header-title {
+            color: white;
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            font-weight: 400;
+        }
+
         .toolbar-card {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            border: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+        }
+
+        .table-card {
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
         }
         
         .management-section {
@@ -298,6 +324,64 @@
             padding: 8px 12px !important;
             line-height: 1.4 !important;
         }
+
+        /* 手风琴图标样式 */
+        .collapse-icon {
+            transition: transform 0.3s ease;
+            color: #409eff;
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        /* 表格栅格样式 */
+        .el-table {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+        }
+
+        .el-table .el-table__header-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        }
+
+        .el-table .el-table__header th {
+            background: transparent !important;
+            border-bottom: 2px solid #dee2e6 !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+        }
+
+        .el-table .el-table__body tr:nth-child(even) {
+            background-color: #f8f9fa !important;
+        }
+
+        .el-table .el-table__body tr:hover {
+            background-color: #e3f2fd !important;
+        }
+
+        .el-table .el-table__body td {
+            border-right: 1px solid #e9ecef !important;
+            border-bottom: 1px solid #e9ecef !important;
+        }
+
+        .el-table .el-table__body td:last-child {
+            border-right: none !important;
+        }
+
+        /* 周末列特殊样式 */
+        .el-table .weekend-header {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%) !important;
+            color: #e53e3e !important;
+        }
+
+        .weekend-cell {
+            background-color: #fff5f5 !important;
+        }
+
+        .weekend-cell:hover {
+            background-color: #fed7d7 !important;
+        }
         
         /* 自定义表格样式 */
         .el-table .weekend-header .cell {
@@ -342,6 +426,7 @@
             <!-- 头部 -->
             <el-card class="header-card" shadow="never">
                 <h1 class="header-title">团队工时管理系统</h1>
+                <p class="header-subtitle">Enterprise Timesheet Management Platform</p>
             </el-card>
             
             <!-- 工具栏 -->
@@ -349,7 +434,13 @@
                 <el-collapse-item title="工具栏" name="toolbar">
                     <template #title>
                         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <span>🛠️ 工具栏</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <el-icon class="collapse-icon" :class="{ 'collapsed': !activeToolbar.includes('toolbar') }">
+                                    <ArrowDown />
+                                </el-icon>
+                                <span style="font-weight: 600; color: #2c3e50;">🛠️ 管理工具</span>
+                                <el-tag size="small" type="info" v-if="!activeToolbar.includes('toolbar')">点击展开</el-tag>
+                            </div>
                             <div class="export-section" style="margin-right: 20px;" @click.stop>
                                 <el-button type="success" :icon="Download" @click="exportCSV" size="small">导出 CSV</el-button>
                                 <el-button type="success" :icon="Download" @click="exportJSON" size="small">导出 JSON</el-button>
@@ -358,7 +449,7 @@
                     </template>
 
                     <el-card shadow="never">
-                        <!-- 月份选择 -->
+                        <!-- 月份选择和显示控制 -->
                         <el-row :gutter="20" align="middle" style="margin-bottom: 20px;">
                             <el-col :span="6">
                                 <el-form-item label="选择年月:">
@@ -371,6 +462,14 @@
                                         @change="onMonthChange"
                                         style="width: 100%;">
                                     </el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="6">
+                                <el-form-item label="显示设置:">
+                                    <el-radio-group v-model="showWeekends" @change="onWeekendDisplayChange">
+                                        <el-radio :label="true">显示周末</el-radio>
+                                        <el-radio :label="false">隐藏周末</el-radio>
+                                    </el-radio-group>
                                 </el-form-item>
                             </el-col>
                         </el-row>

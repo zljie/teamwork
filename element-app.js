@@ -13,7 +13,8 @@ const {
     Folder,
     Edit,
     Check,
-    Close
+    Close,
+    ArrowDown
 } = ElementPlusIconsVue;
 
 createApp({
@@ -67,6 +68,7 @@ createApp({
         const importType = ref('');
         const importText = ref('');
         const activeToolbar = ref([]);
+        const showWeekends = ref(true);
         
         // ===== 计算属性 =====
         
@@ -75,7 +77,13 @@ createApp({
             if (!currentMonth.value) return [];
             const [year, month] = currentMonth.value.split('-');
             const days = new Date(year, month, 0).getDate();
-            return Array.from({ length: days }, (_, i) => i + 1);
+            const allDays = Array.from({ length: days }, (_, i) => i + 1);
+
+            // 根据showWeekends设置过滤周末
+            if (!showWeekends.value) {
+                return allDays.filter(day => !isWeekend(day));
+            }
+            return allDays;
         });
         
         // 导入模态框标题
@@ -467,6 +475,11 @@ createApp({
             saveData();
             console.log('月份已切换到:', currentMonth.value);
         }
+
+        // 周末显示变化处理
+        function onWeekendDisplayChange(value) {
+            console.log('周末显示设置变更为:', value ? '显示周末' : '隐藏周末');
+        }
         
         // 批量导入相关
         function openImportModal(type) {
@@ -625,6 +638,7 @@ createApp({
             Edit,
             Check,
             Close,
+            ArrowDown,
             
             // 数据
             employees,
@@ -639,6 +653,7 @@ createApp({
             importType,
             importText,
             activeToolbar,
+            showWeekends,
             
             // 计算属性
             daysInMonth,
@@ -655,6 +670,7 @@ createApp({
             updateTimesheet,
             batchBindTimesheet,
             onMonthChange,
+            onWeekendDisplayChange,
             isWeekend,
             formatDateHeader,
             openImportModal,
