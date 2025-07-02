@@ -6,10 +6,14 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required for static files'",
-    "vercel-build": "echo 'No build step required'",
-    "deploy": "vercel --prod",
-    "deploy-preview": "vercel"
+    "build": "node build.js",
+    "vercel-build": "npm run build",
+    "deploy": "npm run build && vercel --prod",
+    "deploy-preview": "npm run build && vercel",
+    "clean": "rm -rf public",
+    "prebuild": "npm run clean",
+    "serve:public": "node serve-public.js",
+    "test:build": "npm run build && npm run serve:public"
   },
   "keywords": [
     "timesheet",

@@ -1,61 +1,18 @@
-// Element Plus 团队工时管理系统
+// Vue.js 团队工时管理系统
 const { createApp, ref, computed, reactive, watch, nextTick } = Vue;
-const { ElMessage, ElMessageBox, ElNotification } = ElementPlus;
-
-// 注册Element Plus图标
-const {
-    Plus,
-    Delete,
-    Download,
-    Upload,
-    Calendar,
-    User,
-    Folder,
-    Edit,
-    Check,
-    Close
-} = ElementPlusIconsVue;
 
 createApp({
     setup() {
         // ===== 数据模型定义 =====
-
-        // 员工对象模型 - 初始化示例数据
-        const employees = ref([
-            {
-                id: 'emp_001',
-                name: '张三',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'emp_002',
-                name: '李四',
-                createdAt: new Date().toISOString()
-            }
-        ]);
-
-        // 项目对象模型 - 初始化示例数据
-        const projects = ref([
-            {
-                id: 'proj_001',
-                name: '示例项目A',
-                createdAt: new Date().toISOString()
-            }
-        ]);
-
+        
+        // 员工对象模型
+        const employees = ref([]);
+        
+        // 项目对象模型  
+        const projects = ref([]);
+        
         // 工作日志对象模型 - 结构: { employeeId: { 'MM-DD': projectId } }
-        // 初始化一些示例工时数据
-        const timesheetData = reactive({
-            'emp_001': {
-                '12-01': 'proj_001',
-                '12-02': 'proj_001',
-                '12-03': 'proj_001'
-            },
-            'emp_002': {
-                '12-01': 'proj_001',
-                '12-04': 'proj_001'
-            }
-        });
+        const timesheetData = reactive({});
         
         // ===== 界面状态管理 =====
         const currentMonth = ref(getCurrentMonth());
@@ -63,6 +20,7 @@ createApp({
         const newProjectName = ref('');
         const selectedEmployees = ref([]);
         const selectedProject = ref('');
+        const showEmployeeDropdown = ref(false);
         const showImportModal = ref(false);
         const importType = ref('');
         const importText = ref('');
@@ -77,65 +35,14 @@ createApp({
             return Array.from({ length: days }, (_, i) => i + 1);
         });
         
+        // 获取选中员工对象
+        const getSelectedEmployeeObjects = () => {
+            return employees.value.filter(emp => selectedEmployees.value.includes(emp.id));
+        };
+        
         // 导入模态框标题
         const importModalTitle = computed(() => {
             return importType.value === 'employee' ? '批量导入员工' : '批量导入项目';
-        });
-
-        // 计算员工工作天数统计
-        const employeeWorkDaysStats = computed(() => {
-            const stats = {};
-            employees.value.forEach(employee => {
-                const workDays = [];
-                const employeeData = timesheetData[employee.id] || {};
-
-                Object.keys(employeeData).forEach(dateKey => {
-                    if (employeeData[dateKey]) { // 有项目分配
-                        workDays.push(dateKey);
-                    }
-                });
-
-                stats[employee.id] = {
-                    workDays: workDays.length,
-                    dates: workDays.sort()
-                };
-            });
-            return stats;
-        });
-
-        // 计算项目人天统计
-        const projectManDaysStats = computed(() => {
-            const stats = {};
-            projects.value.forEach(project => {
-                let totalManDays = 0;
-                const employeeList = [];
-
-                employees.value.forEach(employee => {
-                    const employeeData = timesheetData[employee.id] || {};
-                    let employeeDays = 0;
-
-                    Object.keys(employeeData).forEach(dateKey => {
-                        if (employeeData[dateKey] === project.id) {
-                            employeeDays++;
-                        }
-                    });
-
-                    if (employeeDays > 0) {
-                        totalManDays += employeeDays;
-                        employeeList.push({
-                            name: employee.name,
-                            days: employeeDays
-                        });
-                    }
-                });
-
-                stats[project.id] = {
-                    totalManDays,
-                    employeeCount: employeeList.length,
-                    employees: employeeList
-                };
-            });
-            return stats;
         });
         
         // ===== 工具函数 =====
@@ -158,13 +65,6 @@ createApp({
             const date = new Date(year, month - 1, day);
             const dayOfWeek = date.getDay();
             return dayOfWeek === 0 || dayOfWeek === 6;
-        }
-        
-        // 格式化日期表头
-        function formatDateHeader(day) {
-            if (!currentMonth.value) return '';
-            const month = currentMonth.value.split('-')[1];
-            return `${month}/${String(day).padStart(2, '0')}`;
         }
         
         // 获取日期键
@@ -194,28 +94,16 @@ createApp({
                 const saved = localStorage.getItem('timesheetData');
                 if (saved) {
                     const data = JSON.parse(saved);
-                    // 只有当localStorage中有数据时才覆盖初始数据
-                    if (data.employees && data.employees.length > 0) {
-                        employees.value = data.employees;
-                    }
-                    if (data.projects && data.projects.length > 0) {
-                        projects.value = data.projects;
-                    }
+                    employees.value = data.employees || [];
+                    projects.value = data.projects || [];
                     Object.assign(timesheetData, data.timesheetData || {});
                     if (data.currentMonth) {
                         currentMonth.value = data.currentMonth;
                     }
                     console.log('数据已加载:', data);
-                } else {
-                    console.log('使用初始示例数据');
-                    // 首次使用，保存初始数据
-                    saveData();
                 }
             } catch (error) {
                 console.error('加载数据失败:', error);
-                ElMessage.error('加载数据失败，使用初始数据');
-                // 出错时保存当前初始数据
-                saveData();
             }
         }
         
@@ -225,12 +113,12 @@ createApp({
         function addEmployee() {
             const name = newEmployeeName.value.trim();
             if (!name) {
-                ElMessage.warning('请输入员工姓名');
+                alert('请输入员工姓名');
                 return;
             }
             
             if (employees.value.some(emp => emp.name === name)) {
-                ElMessage.warning('该员工已存在');
+                alert('该员工已存在');
                 return;
             }
             
@@ -243,41 +131,20 @@ createApp({
             employees.value.push(employee);
             newEmployeeName.value = '';
             saveData();
-
-            // 强制触发响应式更新
-            nextTick(() => {
-                console.log('员工列表已更新，当前员工数量:', employees.value.length);
-            });
-
-            ElMessage.success(`员工"${name}"添加成功`);
             console.log('添加员工:', employee);
         }
         
         // 删除员工
-        async function deleteEmployee(employeeId) {
+        function deleteEmployee(employeeId) {
             const employee = employees.value.find(emp => emp.id === employeeId);
             if (!employee) return;
             
-            try {
-                await ElMessageBox.confirm(
-                    `确定要删除员工"${employee.name}"吗？这将清除该员工的所有工时数据。`,
-                    '删除确认',
-                    {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning',
-                    }
-                );
-                
+            if (confirm(`确定要删除员工"${employee.name}"吗？这将清除该员工的所有工时数据。`)) {
                 employees.value = employees.value.filter(emp => emp.id !== employeeId);
                 delete timesheetData[employeeId];
                 selectedEmployees.value = selectedEmployees.value.filter(id => id !== employeeId);
                 saveData();
-                
-                ElMessage.success(`员工"${employee.name}"删除成功`);
                 console.log('删除员工:', employee);
-            } catch {
-                // 用户取消删除
             }
         }
         
@@ -287,12 +154,12 @@ createApp({
         function addProject() {
             const name = newProjectName.value.trim();
             if (!name) {
-                ElMessage.warning('请输入项目名称');
+                alert('请输入项目名称');
                 return;
             }
             
             if (projects.value.some(proj => proj.name === name)) {
-                ElMessage.warning('该项目已存在');
+                alert('该项目已存在');
                 return;
             }
             
@@ -305,32 +172,15 @@ createApp({
             projects.value.push(project);
             newProjectName.value = '';
             saveData();
-
-            // 强制触发响应式更新
-            nextTick(() => {
-                console.log('项目列表已更新，当前项目数量:', projects.value.length);
-            });
-
-            ElMessage.success(`项目"${name}"添加成功`);
             console.log('添加项目:', project);
         }
         
         // 删除项目
-        async function deleteProject(projectId) {
+        function deleteProject(projectId) {
             const project = projects.value.find(proj => proj.id === projectId);
             if (!project) return;
             
-            try {
-                await ElMessageBox.confirm(
-                    `确定要删除项目"${project.name}"吗？这将清除所有相关的工时数据。`,
-                    '删除确认',
-                    {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning',
-                    }
-                );
-                
+            if (confirm(`确定要删除项目"${project.name}"吗？这将清除所有相关的工时数据。`)) {
                 projects.value = projects.value.filter(proj => proj.id !== projectId);
                 
                 // 清除工时数据中的该项目
@@ -347,11 +197,33 @@ createApp({
                 }
                 
                 saveData();
-                
-                ElMessage.success(`项目"${project.name}"删除成功`);
                 console.log('删除项目:', project);
-            } catch {
-                // 用户取消删除
+            }
+        }
+        
+        // ===== 员工选择器 =====
+        
+        // 切换员工下拉框显示
+        function toggleEmployeeDropdown() {
+            showEmployeeDropdown.value = !showEmployeeDropdown.value;
+        }
+        
+        // 切换员工选择状态
+        function toggleEmployeeSelection(employeeId) {
+            const index = selectedEmployees.value.indexOf(employeeId);
+            if (index > -1) {
+                selectedEmployees.value.splice(index, 1);
+            } else {
+                selectedEmployees.value.push(employeeId);
+            }
+            console.log('选中员工:', selectedEmployees.value);
+        }
+        
+        // 移除员工选择
+        function removeEmployee(employeeId) {
+            const index = selectedEmployees.value.indexOf(employeeId);
+            if (index > -1) {
+                selectedEmployees.value.splice(index, 1);
             }
         }
         
@@ -380,7 +252,7 @@ createApp({
         }
         
         // 批量绑定工时
-        async function batchBindTimesheet(includeWeekends = false) {
+        function batchBindTimesheet(includeWeekends = false) {
             console.log('=== 开始批量绑定工时 ===');
             console.log('includeWeekends:', includeWeekends);
             console.log('selectedEmployees:', selectedEmployees.value);
@@ -388,17 +260,17 @@ createApp({
             
             // 验证输入
             if (selectedEmployees.value.length === 0) {
-                ElMessage.warning('请先选择员工');
+                alert('请先选择员工');
                 return;
             }
             
             if (!selectedProject.value) {
-                ElMessage.warning('请先选择项目');
+                alert('请先选择项目');
                 return;
             }
             
             if (!currentMonth.value) {
-                ElMessage.warning('请先选择年月');
+                alert('请先选择年月');
                 return;
             }
             
@@ -410,55 +282,47 @@ createApp({
             const project = projects.value.find(proj => proj.id === selectedProject.value);
             const dateRange = includeWeekends ? '当月所有日期' : '当月工作日';
             
-            try {
-                await ElMessageBox.confirm(
-                    `确定要为以下员工绑定${dateRange}的工时到项目"${project.name}"吗？\n\n员工：${employeeNames.join('、')}`,
-                    '批量绑定确认',
-                    {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'info',
-                    }
-                );
-                
-                // 执行批量绑定
-                let totalUpdatedCells = 0;
-                
-                selectedEmployees.value.forEach(employeeId => {
-                    if (!timesheetData[employeeId]) {
-                        timesheetData[employeeId] = {};
-                    }
-                    
-                    let updatedCells = 0;
-                    
-                    daysInMonth.value.forEach(day => {
-                        const shouldUpdate = includeWeekends || !isWeekend(day);
-                        
-                        if (shouldUpdate) {
-                            const dateKey = getDateKey(day);
-                            timesheetData[employeeId][dateKey] = selectedProject.value;
-                            updatedCells++;
-                        }
-                    });
-                    
-                    totalUpdatedCells += updatedCells;
-                    console.log(`员工 ${employeeNames.find(name => employees.value.find(emp => emp.name === name)?.id === employeeId)} 更新了 ${updatedCells} 个单元格`);
-                });
-                
-                saveData();
-                
-                // 显示成功通知
-                ElNotification({
-                    title: '批量绑定完成',
-                    message: `员工：${employeeNames.join('、')}\n项目：${project.name}\n范围：${dateRange}\n共更新：${totalUpdatedCells} 个单元格`,
-                    type: 'success',
-                    duration: 5000
-                });
-                
-                console.log('批量绑定完成，更新的数据:', timesheetData);
-            } catch {
-                // 用户取消操作
+            const confirmMessage = `确定要为以下员工绑定${dateRange}的工时到项目"${project.name}"吗？\n\n员工：${employeeNames.join('、')}`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
             }
+            
+            // 执行批量绑定
+            let totalUpdatedCells = 0;
+            
+            selectedEmployees.value.forEach(employeeId => {
+                if (!timesheetData[employeeId]) {
+                    timesheetData[employeeId] = {};
+                }
+                
+                let updatedCells = 0;
+                
+                daysInMonth.value.forEach(day => {
+                    const shouldUpdate = includeWeekends || !isWeekend(day);
+                    
+                    if (shouldUpdate) {
+                        const dateKey = getDateKey(day);
+                        timesheetData[employeeId][dateKey] = selectedProject.value;
+                        updatedCells++;
+                    }
+                });
+                
+                totalUpdatedCells += updatedCells;
+                console.log(`员工 ${employeeNames.find(name => employees.value.find(emp => emp.name === name)?.id === employeeId)} 更新了 ${updatedCells} 个单元格`);
+            });
+            
+            saveData();
+            
+            // 显示成功消息
+            const successMessage = `批量绑定完成！\n\n` +
+                `员工：${employeeNames.join('、')}\n` +
+                `项目：${project.name}\n` +
+                `范围：${dateRange}\n` +
+                `共更新：${totalUpdatedCells} 个单元格`;
+                
+            alert(successMessage);
+            console.log('批量绑定完成，更新的数据:', timesheetData);
         }
         
         // ===== 其他功能 =====
@@ -470,7 +334,7 @@ createApp({
         }
         
         // 批量导入相关
-        function openImportModal(type) {
+        function showImportModal(type) {
             importType.value = type;
             importText.value = '';
             showImportModal.value = true;
@@ -486,7 +350,7 @@ createApp({
             const items = importText.value.split(',').map(item => item.trim()).filter(item => item);
             
             if (items.length === 0) {
-                ElMessage.warning('请输入要导入的内容');
+                alert('请输入要导入的内容');
                 return;
             }
             
@@ -502,7 +366,7 @@ createApp({
                         addedCount++;
                     }
                 });
-                ElMessage.success(`成功导入 ${addedCount} 个员工`);
+                alert(`成功导入 ${addedCount} 个员工`);
             } else if (importType.value === 'project') {
                 let addedCount = 0;
                 items.forEach(name => {
@@ -515,7 +379,7 @@ createApp({
                         addedCount++;
                     }
                 });
-                ElMessage.success(`成功导入 ${addedCount} 个项目`);
+                alert(`成功导入 ${addedCount} 个项目`);
             }
             
             saveData();
@@ -525,7 +389,7 @@ createApp({
         // 导出功能
         function exportCSV() {
             if (!currentMonth.value) {
-                ElMessage.warning('请先选择年月');
+                alert('请先选择年月');
                 return;
             }
             
@@ -564,8 +428,6 @@ createApp({
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            ElMessage.success('CSV文件导出成功');
         }
         
         function exportJSON() {
@@ -575,32 +437,21 @@ createApp({
                 timesheetData: timesheetData,
                 currentMonth: currentMonth.value,
                 exportTime: new Date().toISOString(),
-                version: '3.0-ElementPlus'
+                version: '2.0'
             };
-
+            
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-
+            
             const [year, month] = currentMonth.value.split('-');
             link.setAttribute('download', `工时数据_${year}-${month}.json`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            ElMessage.success('JSON文件导出成功');
         }
-
-        // 重置为初始数据（开发调试用）
-        function resetToInitialData() {
-            localStorage.removeItem('timesheetData');
-            location.reload();
-        }
-
-        // 在控制台暴露重置函数，方便调试
-        window.resetToInitialData = resetToInitialData;
         
         // ===== 生命周期 =====
         
@@ -612,20 +463,15 @@ createApp({
             saveData();
         }, { deep: true });
         
+        // 点击外部关闭下拉框
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.tag-selector')) {
+                showEmployeeDropdown.value = false;
+            }
+        });
+        
         // ===== 返回响应式数据和方法 =====
         return {
-            // 图标
-            Plus,
-            Delete,
-            Download,
-            Upload,
-            Calendar,
-            User,
-            Folder,
-            Edit,
-            Check,
-            Close,
-            
             // 数据
             employees,
             projects,
@@ -635,32 +481,34 @@ createApp({
             newProjectName,
             selectedEmployees,
             selectedProject,
+            showEmployeeDropdown,
             showImportModal,
             importType,
             importText,
             
             // 计算属性
             daysInMonth,
+            getSelectedEmployeeObjects,
             importModalTitle,
-            employeeWorkDaysStats,
-            projectManDaysStats,
             
             // 方法
             addEmployee,
             deleteEmployee,
             addProject,
             deleteProject,
+            toggleEmployeeDropdown,
+            toggleEmployeeSelection,
+            removeEmployee,
             getTimesheetValue,
             updateTimesheet,
             batchBindTimesheet,
             onMonthChange,
             isWeekend,
-            formatDateHeader,
-            openImportModal,
+            showImportModal: showImportModal,
             closeImportModal,
             confirmImport,
             exportCSV,
             exportJSON
         };
     }
-}).use(ElementPlus).mount('#app');
+}).mount('#app');

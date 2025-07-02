@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团队工时管理系统 - Vue版本</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="vue-styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>团队工时管理系统</h1>
+        </header>
+        
+        <!-- 顶部工具栏 -->
+        <div class="top-toolbar">
+            <div class="toolbar-section">
+                <div class="month-selector-group">
+                    <label for="monthSelector">选择年月:</label>
+                    <input 
+                        type="month" 
+                        v-model="currentMonth" 
+                        class="month-selector"
+                        @change="onMonthChange">
+                </div>
+            </div>
+            
+            <div class="toolbar-section">
+                <div class="management-group">
+                    <div class="management-item">
+                        <label>人员管理:</label>
+                        <div class="input-group-inline">
+                            <input 
+                                type="text" 
+                                v-model="newEmployeeName" 
+                                @keyup.enter="addEmployee"
+                                placeholder="输入人员姓名" 
+                                class="input-field-small">
+                            <button @click="addEmployee" class="btn btn-primary btn-small">添加</button>
+                            <button @click="showImportModal('employee')" class="btn btn-info btn-small">批量导入</button>
+                        </div>
+                    </div>
+                    <div class="management-item">
+                        <label>项目管理:</label>
+                        <div class="input-group-inline">
+                            <input 
+                                type="text" 
+                                v-model="newProjectName" 
+                                @keyup.enter="addProject"
+                                placeholder="输入项目名称" 
+                                class="input-field-small">
+                            <button @click="addProject" class="btn btn-primary btn-small">添加</button>
+                            <button @click="showImportModal('project')" class="btn btn-info btn-small">批量导入</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar-section">
+                <div class="batch-operations">
+                    <div class="batch-group">
+                        <label>批量绑定工时:</label>
+                        <div class="batch-controls">
+                            <div class="select-group">
+                                <label>选择员工（可多选）:</label>
+                                <div class="tag-selector" @click="toggleEmployeeDropdown">
+                                    <div class="selected-tags" :class="{ active: showEmployeeDropdown }">
+                                        <span v-if="selectedEmployees.length === 0" class="placeholder">点击选择员工...</span>
+                                        <div v-for="employee in getSelectedEmployeeObjects()" :key="employee.id" class="employee-tag">
+                                            <span>{{ employee.name }}</span>
+                                            <button @click.stop="removeEmployee(employee.id)" class="remove-tag">&times;</button>
+                                        </div>
+                                    </div>
+                                    <div v-show="showEmployeeDropdown" class="dropdown-content">
+                                        <div 
+                                            v-for="employee in employees" 
+                                            :key="employee.id"
+                                            @click.stop="toggleEmployeeSelection(employee.id)"
+                                            class="dropdown-item"
+                                            :class="{ selected: selectedEmployees.includes(employee.id) }">
+                                            {{ employee.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="select-group">
+                                <label>选择项目:</label>
+                                <select v-model="selectedProject" class="select-field">
+                                    <option value="">请选择项目</option>
+                                    <option v-for="project in projects" :key="project.id" :value="project.id">
+                                        {{ project.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="button-group">
+                                <button @click="batchBindTimesheet(true)" class="btn btn-primary">绑定当月所有工时</button>
+                                <button @click="batchBindTimesheet(false)" class="btn btn-info">仅绑定工作日</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar-section">
+                <div class="export-group">
+                    <button @click="exportCSV" class="btn btn-success">导出 CSV</button>
+                    <button @click="exportJSON" class="btn btn-success">导出 JSON</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 工时表格区域 -->
+        <div class="table-area">
+            <div class="table-container">
+                <table class="timesheet-table">
+                    <thead>
+                        <tr>
+                            <th class="name-column">姓名</th>
+                            <th v-for="day in daysInMonth" :key="day" 
+                                :class="{ weekend: isWeekend(day) }">
+                                {{ String(currentMonth).split('-')[1] }}/{{ String(day).padStart(2, '0') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="employee in employees" :key="employee.id">
+                            <td class="name-cell">{{ employee.name }}</td>
+                            <td v-for="day in daysInMonth" :key="day" 
+                                :class="{ 'weekend-cell': isWeekend(day) }">
+                                <select 
+                                    v-model="getTimesheetValue(employee.id, day)"
+                                    @change="updateTimesheet(employee.id, day, $event.target.value)"
+                                    class="cell-select">
+                                    <option value="">--</option>
+                                    <option v-for="project in projects" :key="project.id" :value="project.id">
+                                        {{ project.name }}
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 人员和项目列表显示区域 -->
+        <div class="lists-panel">
+            <div class="list-section">
+                <h4>人员列表 ({{ employees.length }})</h4>
+                <div class="list-container-horizontal">
+                    <div v-for="employee in employees" :key="employee.id" class="list-item">
+                        <span>{{ employee.name }}</span>
+                        <button @click="deleteEmployee(employee.id)" class="delete-btn">删除</button>
+                    </div>
+                </div>
+            </div>
+            <div class="list-section">
+                <h4>项目列表 ({{ projects.length }})</h4>
+                <div class="list-container-horizontal">
+                    <div v-for="project in projects" :key="project.id" class="list-item">
+                        <span>{{ project.name }}</span>
+                        <button @click="deleteProject(project.id)" class="delete-btn">删除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 批量导入模态框 -->
+        <div v-show="showImportModal" class="modal" @click="closeImportModal">
+            <div class="modal-content" @click.stop>
+                <div class="modal-header">
+                    <h3>{{ importModalTitle }}</h3>
+                    <span @click="closeImportModal" class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>请输入要导入的内容，用逗号分隔：</p>
+                    <textarea 
+                        v-model="importText" 
+                        placeholder="张三,李四,王五,赵六" 
+                        rows="8"
+                        class="import-textarea"></textarea>
+                    <div class="import-help">
+                        <small>支持格式：用逗号分隔多个项目，例如：张三,李四,王五</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button @click="confirmImport" class="btn btn-primary">确认导入</button>
+                    <button @click="closeImportModal" class="btn btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="vue-app.js"></script>
+</body>
+</html>
