@@ -66,6 +66,7 @@ createApp({
         const showImportModal = ref(false);
         const importType = ref('');
         const importText = ref('');
+        const activeToolbar = ref([]);
         
         // ===== 计算属性 =====
         
@@ -638,6 +639,7 @@ createApp({
             showImportModal,
             importType,
             importText,
+            activeToolbar,
             
             // 计算属性
             daysInMonth,
