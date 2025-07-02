@@ -367,18 +367,16 @@ createApp({
         // 更新工时表
         function updateTimesheet(employeeId, day, projectId) {
             const dateKey = getDateKey(day);
-            
+
             if (!timesheetData[employeeId]) {
                 timesheetData[employeeId] = {};
             }
-            
+
             timesheetData[employeeId][dateKey] = projectId;
             saveData();
-            
-            const employee = employees.value.find(emp => emp.id === employeeId);
-            const project = projects.value.find(proj => proj.id === projectId);
-            console.log(`更新工时: ${employee?.name} ${dateKey} -> ${project?.name || '无'}`);
         }
+
+
         
         // 批量绑定工时
         async function batchBindTimesheet(includeWeekends = false) {
@@ -602,6 +600,7 @@ createApp({
 
         // 在控制台暴露重置函数，方便调试
         window.resetToInitialData = resetToInitialData;
+
         
         // ===== 生命周期 =====
         

@@ -161,6 +161,143 @@
             background-color: #f8f9fa;
             border-radius: 4px;
         }
+
+        /* 工时表格单元格样式 */
+        .timesheet-cell {
+            position: relative;
+            height: 100%;
+            min-height: 32px;
+        }
+
+        .timesheet-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 32px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            position: relative;
+            padding: 4px 8px;
+        }
+
+        .timesheet-display:hover {
+            background-color: #f0f9ff;
+            border: 1px solid #409eff;
+        }
+
+        .timesheet-display.has-project {
+            background-color: #e7f5ff;
+            border: 1px solid #409eff;
+            color: #409eff;
+            font-weight: 500;
+        }
+
+        .timesheet-display.has-project:hover {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .timesheet-display.weekend-display {
+            background-color: #fff5f5;
+        }
+
+        .timesheet-display.weekend-display:hover {
+            background-color: #fed7d7;
+            border-color: #f56565;
+        }
+
+        .project-name {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+            word-break: break-all;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .empty-placeholder {
+            color: #c0c4cc;
+            font-size: 12px;
+        }
+
+        .edit-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            color: #909399;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .timesheet-display:hover .edit-icon {
+            opacity: 1;
+        }
+
+        /* 下拉选项样式 */
+        .project-option-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .project-option .project-name {
+            flex: 1;
+            font-weight: 500;
+            color: #303133;
+        }
+
+        .project-tag {
+            margin-left: 8px;
+        }
+
+        .empty-option {
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* 周末单元格特殊样式 */
+        .weekend-cell .timesheet-display {
+            background-color: #fef0f0;
+        }
+
+        .weekend-cell .timesheet-display.has-project {
+            background-color: #ffe6e6;
+            border-color: #f56c6c;
+            color: #f56c6c;
+        }
+
+        /* 确保下拉框正确显示 */
+        .timesheet-select-dropdown {
+            z-index: 9999 !important;
+        }
+
+        .timesheet-cell .el-select {
+            width: 100% !important;
+        }
+
+        .timesheet-cell .el-select .el-input {
+            width: 100% !important;
+        }
+
+        .timesheet-cell .el-select .el-input__wrapper {
+            width: 100% !important;
+            min-height: 28px !important;
+        }
+
+        /* 简化选项样式，避免复杂布局导致的问题 */
+        .el-select-dropdown__item {
+            padding: 8px 12px !important;
+            line-height: 1.4 !important;
+        }
         
         /* 自定义表格样式 */
         .el-table .weekend-header .cell {
@@ -364,20 +501,27 @@
                         align="center"
                         :class-name="isWeekend(day) ? 'weekend-header' : ''">
                         <template #default="{ row }">
-                            <div :class="{ 'weekend-cell': isWeekend(day) }">
+                            <div :class="{ 'weekend-cell': isWeekend(day) }" class="timesheet-cell">
                                 <el-select
                                     :model-value="getTimesheetValue(row.id, day)"
                                     @change="updateTimesheet(row.id, day, $event)"
-                                    placeholder="--"
+                                    placeholder="选择项目"
                                     size="small"
                                     style="width: 100%;"
-                                    :teleported="false">
-                                    <el-option label="--" value=""></el-option>
+                                    popper-class="timesheet-select-dropdown"
+                                    filterable
+                                    clearable>
+                                    <el-option
+                                        label="无项目"
+                                        value="">
+                                        <span style="color: #909399;">-- 无项目 --</span>
+                                    </el-option>
                                     <el-option
                                         v-for="project in projects"
                                         :key="project.id"
                                         :label="project.name"
                                         :value="project.id">
+                                        <span>{{ project.name }}</span>
                                     </el-option>
                                 </el-select>
                             </div>
