@@ -577,21 +577,30 @@ createApp({
                 exportTime: new Date().toISOString(),
                 version: '3.0-ElementPlus'
             };
-            
+
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            
+
             const [year, month] = currentMonth.value.split('-');
             link.setAttribute('download', `工时数据_${year}-${month}.json`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             ElMessage.success('JSON文件导出成功');
         }
+
+        // 重置为初始数据（开发调试用）
+        function resetToInitialData() {
+            localStorage.removeItem('timesheetData');
+            location.reload();
+        }
+
+        // 在控制台暴露重置函数，方便调试
+        window.resetToInitialData = resetToInitialData;
         
         // ===== 生命周期 =====
         
