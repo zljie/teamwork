@@ -14,7 +14,9 @@ const {
     Edit,
     Check,
     Close,
-    ArrowDown
+    ArrowDown,
+    Share,
+    DocumentCopy
 } = ElementPlusIconsVue;
 
 createApp({
@@ -69,6 +71,8 @@ createApp({
         const importText = ref('');
         const activeToolbar = ref([]);
         const showWeekends = ref(true);
+        const showShareModal = ref(false);
+        const shareLink = ref('');
         
         // ===== 计算属性 =====
         
@@ -614,11 +618,120 @@ createApp({
         // 在控制台暴露重置函数，方便调试
         window.resetToInitialData = resetToInitialData;
 
+        // ===== 数据分享功能 =====
+
+        // 生成分享数据
+        function generateShareData() {
+            const shareData = {
+                employees: employees.value,
+                projects: projects.value,
+                timesheetData: timesheetData,
+                currentMonth: currentMonth.value,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            // 压缩和编码数据
+            const jsonString = JSON.stringify(shareData);
+            const compressed = LZString.compressToEncodedURIComponent(jsonString);
+            return compressed;
+        }
+
+        // 解析分享数据
+        function parseShareData(encodedData) {
+            try {
+                const decompressed = LZString.decompressFromEncodedURIComponent(encodedData);
+                if (!decompressed) {
+                    throw new Error('数据解压失败');
+                }
+
+                const shareData = JSON.parse(decompressed);
+
+                // 验证数据格式
+                if (!shareData.employees || !shareData.projects || !shareData.timesheetData) {
+                    throw new Error('数据格式不正确');
+                }
+
+                return shareData;
+            } catch (error) {
+                console.error('解析分享数据失败:', error);
+                return null;
+            }
+        }
+
+        // 生成分享链接
+        function generateShareLink() {
+            const shareData = generateShareData();
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareUrl = `${baseUrl}?share=${shareData}`;
+
+            console.log('生成分享链接:', shareUrl);
+            return shareUrl;
+        }
+
+        // 从URL加载分享数据
+        function loadFromShareLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shareParam = urlParams.get('share');
+
+            if (shareParam) {
+                const shareData = parseShareData(shareParam);
+                if (shareData) {
+                    // 加载数据
+                    employees.value = shareData.employees || [];
+                    projects.value = shareData.projects || [];
+                    Object.assign(timesheetData, shareData.timesheetData || {});
+                    currentMonth.value = shareData.currentMonth || getCurrentMonth();
+
+                    console.log('已从分享链接加载数据:', shareData);
+                    ElMessage.success('已加载分享的数据');
+
+                    // 清除URL参数，避免重复加载
+                    const newUrl = window.location.origin + window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 打开分享对话框
+        function openShareModal() {
+            const link = generateShareLink();
+            shareLink.value = link;
+            showShareModal.value = true;
+        }
+
+        // 关闭分享对话框
+        function closeShareModal() {
+            showShareModal.value = false;
+            shareLink.value = '';
+        }
+
+        // 复制分享链接
+        async function copyShareLink() {
+            try {
+                await navigator.clipboard.writeText(shareLink.value);
+                ElMessage.success('分享链接已复制到剪贴板');
+            } catch (error) {
+                console.error('复制失败:', error);
+                ElMessage.error('复制失败，请手动复制链接');
+            }
+        }
+
         
         // ===== 生命周期 =====
-        
+
         // 组件挂载时加载数据
         loadData();
+
+        // 检查是否有分享链接数据
+        const hasSharedData = loadFromShareLink();
+        if (hasSharedData) {
+            // 如果加载了分享数据，保存到本地存储
+            saveData();
+        }
         
         // 监听数据变化，自动保存
         watch([employees, projects], () => {
@@ -639,6 +752,8 @@ createApp({
             Check,
             Close,
             ArrowDown,
+            Share,
+            DocumentCopy,
             
             // 数据
             employees,
@@ -654,6 +769,8 @@ createApp({
             importText,
             activeToolbar,
             showWeekends,
+            showShareModal,
+            shareLink,
             
             // 计算属性
             daysInMonth,
@@ -677,7 +794,12 @@ createApp({
             closeImportModal,
             confirmImport,
             exportCSV,
-            exportJSON
+            exportJSON,
+
+            // 分享功能
+            openShareModal,
+            closeShareModal,
+            copyShareLink
         };
     }
 }).use(ElementPlus).mount('#app');

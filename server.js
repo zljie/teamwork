@@ -8,12 +8,14 @@ const PORT = process.env.PORT || 3000;
 // 中间件
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
 
-// 路由 - 提供静态文件
+// 路由 - 提供静态文件（明确指定主页）
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index-element.html'));
 });
+
+// 静态文件服务（放在路由后面，避免冲突）
+app.use(express.static('.'));
 
 app.get('/vue', (req, res) => {
     res.sendFile(path.join(__dirname, 'index-vue.html'));

@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
     <!-- Element Plus Icons -->
     <script src="https://unpkg.com/@element-plus/icons-vue/dist/index.iife.js"></script>
+    <!-- LZ-String for data compression -->
+    <script src="https://unpkg.com/lz-string@1.4.4/libs/lz-string.min.js"></script>
     
     <style>
         body {
@@ -444,6 +446,7 @@
                             <div class="export-section" style="margin-right: 20px;" @click.stop>
                                 <el-button type="success" :icon="Download" @click="exportCSV" size="small">导出 CSV</el-button>
                                 <el-button type="success" :icon="Download" @click="exportJSON" size="small">导出 JSON</el-button>
+                                <el-button type="primary" :icon="Share" @click="openShareModal" size="small">分享数据</el-button>
                             </div>
                         </div>
                     </template>
@@ -712,8 +715,53 @@
                 </span>
             </template>
         </el-dialog>
+
+        <!-- 分享对话框 -->
+        <el-dialog
+            v-model="showShareModal"
+            title="分享工时数据"
+            width="600px"
+            :before-close="closeShareModal">
+            <div style="margin-bottom: 20px;">
+                <p style="color: #606266; margin-bottom: 15px;">
+                    通过下面的链接，您可以将当前的工时数据分享给团队成员。链接包含了所有员工、项目和工时记录数据。
+                </p>
+                <el-alert
+                    title="注意事项"
+                    type="info"
+                    :closable="false"
+                    style="margin-bottom: 15px;">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>分享链接包含完整的工时数据</li>
+                        <li>接收者打开链接后数据会自动加载</li>
+                        <li>数据会保存到接收者的本地存储中</li>
+                        <li>链接较长，建议通过即时通讯工具发送</li>
+                    </ul>
+                </el-alert>
+            </div>
+
+            <el-form-item label="分享链接:">
+                <el-input
+                    v-model="shareLink"
+                    type="textarea"
+                    :rows="4"
+                    readonly
+                    placeholder="生成中..."
+                    style="font-family: monospace; font-size: 12px;">
+                </el-input>
+            </el-form-item>
+
+            <template #footer>
+                <div style="text-align: right;">
+                    <el-button @click="closeShareModal">关闭</el-button>
+                    <el-button type="primary" @click="copyShareLink" :icon="DocumentCopy">
+                        复制链接
+                    </el-button>
+                </div>
+            </template>
+        </el-dialog>
     </div>
-    
+
     <script src="element-app.js"></script>
 </body>
 </html>
