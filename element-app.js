@@ -16,7 +16,8 @@ const {
     Close,
     ArrowDown,
     Share,
-    DocumentCopy
+    DocumentCopy,
+    Document
 } = ElementPlusIconsVue;
 
 createApp({
@@ -484,6 +485,15 @@ createApp({
         function onWeekendDisplayChange(value) {
             console.log('周末显示设置变更为:', value ? '显示周末' : '隐藏周末');
         }
+
+        // 处理导出命令
+        function handleExportCommand(command) {
+            if (command === 'csv') {
+                exportCSV();
+            } else if (command === 'json') {
+                exportJSON();
+            }
+        }
         
         // 批量导入相关
         function openImportModal(type) {
@@ -754,6 +764,7 @@ createApp({
             ArrowDown,
             Share,
             DocumentCopy,
+            Document,
             
             // 数据
             employees,
@@ -788,6 +799,7 @@ createApp({
             batchBindTimesheet,
             onMonthChange,
             onWeekendDisplayChange,
+            handleExportCommand,
             isWeekend,
             formatDateHeader,
             openImportModal,

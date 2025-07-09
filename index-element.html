@@ -36,6 +36,29 @@
             margin-top: 20px;
             margin-bottom: 20px;
         }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body {
+                background: #f5f7fa;
+            }
+
+            .main-container {
+                padding: 15px;
+                margin: 0;
+                border-radius: 0;
+                background: white;
+                box-shadow: none;
+                backdrop-filter: none;
+                min-height: 100vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 10px;
+            }
+        }
         
         .header-card {
             margin-bottom: 30px;
@@ -60,6 +83,27 @@
             font-size: 1.1rem;
             margin-top: 10px;
             font-weight: 400;
+        }
+
+        /* 标题移动端适配 */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2.2rem;
+            }
+
+            .header-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 1.8rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.9rem;
+            }
         }
 
         .toolbar-card {
@@ -188,6 +232,43 @@
         .toolbar-collapse .el-collapse-item__header {
             background-color: #f8f9fa;
             border-radius: 4px;
+        }
+
+        /* 工具栏标题样式 */
+        .toolbar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .toolbar-title-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toolbar-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .expand-hint {
+            white-space: nowrap;
+        }
+
+        /* 周末显示设置样式 */
+        .weekend-display-form {
+            margin-bottom: 0;
+        }
+
+        .weekend-radio-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .weekend-radio {
+            margin-right: 0 !important;
         }
 
         /* 工时表格单元格样式 */
@@ -343,6 +424,13 @@
             overflow: hidden !important;
         }
 
+        /* 统一列宽度 */
+        .el-table .el-table__header th,
+        .el-table .el-table__body td {
+            width: 100px !important;
+            min-width: 100px !important;
+        }
+
         .el-table .el-table__header-wrapper {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
         }
@@ -383,6 +471,302 @@
 
         .weekend-cell:hover {
             background-color: #fed7d7 !important;
+        }
+
+        /* 工具栏移动端优化 */
+        @media (max-width: 768px) {
+            .toolbar-collapse .el-collapse-item__header {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .toolbar-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .toolbar-title-section {
+                justify-content: center;
+            }
+
+            .toolbar-title {
+                font-size: 14px;
+            }
+
+            .expand-hint {
+                font-size: 11px;
+            }
+
+            .export-section {
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                margin-right: 10px !important;
+                flex-wrap: wrap;
+            }
+
+            .export-section .el-button {
+                font-size: 12px;
+                padding: 6px 12px;
+                flex: 1;
+                min-width: 80px;
+            }
+
+            .export-section .el-dropdown {
+                flex: 1;
+            }
+
+            .export-section .el-dropdown .el-button {
+                width: 100%;
+            }
+
+            /* 管理功能移动端布局 */
+            .management-row-mobile {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .management-col-mobile {
+                width: 100% !important;
+            }
+
+            /* 月份控制行移动端优化 */
+            .month-control-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .month-selector-col,
+            .weekend-display-col {
+                width: 100% !important;
+            }
+
+            .month-selector-form .el-form-item__label,
+            .weekend-display-form .el-form-item__label {
+                font-size: 13px;
+                width: auto !important;
+                margin-right: 10px;
+            }
+
+            .weekend-radio-group {
+                flex-direction: row;
+                gap: 20px;
+                justify-content: flex-start;
+            }
+
+            .weekend-radio .el-radio__label {
+                font-size: 13px;
+            }
+
+            /* 批量控制移动端布局 */
+            .batch-controls-inline {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 10px;
+            }
+
+            .batch-controls-inline .el-form-item {
+                margin-bottom: 10px !important;
+            }
+
+            .batch-controls-inline .el-select {
+                width: 100% !important;
+            }
+
+            .batch-controls-inline .el-button-group {
+                display: flex;
+                width: 100%;
+            }
+
+            .batch-controls-inline .el-button-group .el-button {
+                flex: 1;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .export-section {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .export-section .el-button {
+                font-size: 11px;
+                padding: 5px 10px;
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .export-section .el-dropdown {
+                width: 100%;
+            }
+
+            .export-section .el-dropdown .el-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .batch-controls-inline .el-button-group .el-button {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+
+            /* 月份控制小屏幕优化 */
+            .month-selector-form .el-form-item__label,
+            .weekend-display-form .el-form-item__label {
+                font-size: 12px;
+                margin-right: 8px;
+            }
+
+            .weekend-radio-group {
+                gap: 15px;
+            }
+
+            .weekend-radio .el-radio__label {
+                font-size: 12px;
+            }
+        }
+
+        /* 表格移动端优化 */
+        @media (max-width: 768px) {
+            .table-card .el-card__body {
+                padding: 10px;
+            }
+
+            .el-table {
+                font-size: 12px;
+            }
+
+            .el-table .el-table__header th {
+                padding: 8px 4px !important;
+                font-size: 11px !important;
+            }
+
+            .el-table .el-table__body td {
+                padding: 6px 4px !important;
+            }
+
+            .el-table .el-table__body .cell {
+                padding: 0 2px;
+            }
+
+            /* 表格水平滚动 */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* 员工姓名列固定宽度 */
+            .employee-name-column {
+                min-width: 100px !important;
+                width: 100px !important;
+                position: sticky;
+                left: 0;
+                background: white !important;
+                z-index: 10;
+            }
+
+            /* 日期列宽度调整 */
+            .date-column-mobile {
+                width: 100px !important;
+                min-width: 100px !important;
+            }
+
+            /* 下拉选择框移动端优化 */
+            .timesheet-cell .el-select {
+                font-size: 11px;
+            }
+
+            .timesheet-cell .el-select .el-input__wrapper {
+                min-height: 24px !important;
+                padding: 2px 6px;
+            }
+
+            .timesheet-cell .el-select .el-input__inner {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .table-card .el-card__body {
+                padding: 5px;
+            }
+
+            .el-table {
+                font-size: 11px;
+            }
+
+            .el-table .el-table__header th {
+                padding: 6px 2px !important;
+                font-size: 10px !important;
+            }
+
+            .el-table .el-table__body td {
+                padding: 4px 2px !important;
+            }
+
+            .employee-name-column {
+                min-width: 80px !important;
+                width: 80px !important;
+            }
+
+            .date-column-mobile {
+                width: 80px !important;
+                min-width: 80px !important;
+            }
+
+            .timesheet-cell .el-select .el-input__wrapper {
+                min-height: 22px !important;
+                padding: 1px 4px;
+            }
+
+            .timesheet-cell .el-select .el-input__inner {
+                font-size: 10px;
+            }
+        }
+
+        /* 对话框移动端优化 */
+        @media (max-width: 768px) {
+            .el-dialog {
+                width: 95% !important;
+                margin: 0 auto !important;
+            }
+
+            .el-dialog__header {
+                padding: 15px 20px 10px !important;
+            }
+
+            .el-dialog__body {
+                padding: 10px 20px !important;
+            }
+
+            .el-dialog__footer {
+                padding: 10px 20px 15px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .el-dialog {
+                width: 98% !important;
+            }
+
+            .el-dialog__header {
+                padding: 10px 15px 5px !important;
+            }
+
+            .el-dialog__body {
+                padding: 5px 15px !important;
+            }
+
+            .el-dialog__footer {
+                padding: 5px 15px 10px !important;
+            }
+
+            .el-button {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+            }
         }
         
         /* 自定义表格样式 */
@@ -435,27 +819,37 @@
             <el-collapse v-model="activeToolbar" class="toolbar-collapse">
                 <el-collapse-item title="工具栏" name="toolbar">
                     <template #title>
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="toolbar-header">
+                            <div class="toolbar-title-section">
                                 <el-icon class="collapse-icon" :class="{ 'collapsed': !activeToolbar.includes('toolbar') }">
                                     <ArrowDown />
                                 </el-icon>
-                                <span style="font-weight: 600; color: #2c3e50;">🛠️ 管理工具</span>
-                                <el-tag size="small" type="info" v-if="!activeToolbar.includes('toolbar')">点击展开</el-tag>
+                                <span class="toolbar-title">🛠️ 管理工具</span>
+                                <el-tag size="small" type="info" v-if="!activeToolbar.includes('toolbar')" class="expand-hint">点击展开</el-tag>
                             </div>
-                            <div class="export-section" style="margin-right: 20px;" @click.stop>
-                                <el-button type="success" :icon="Download" @click="exportCSV" size="small">导出 CSV</el-button>
-                                <el-button type="success" :icon="Download" @click="exportJSON" size="small">导出 JSON</el-button>
-                                <el-button type="primary" :icon="Share" @click="openShareModal" size="small">分享数据</el-button>
+                            <div class="export-section" @click.stop>
+                                <el-dropdown @command="handleExportCommand" trigger="click">
+                                    <el-button type="success" :icon="Download" size="small">
+                                        导出
+                                        <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                                    </el-button>
+                                    <template #dropdown>
+                                        <el-dropdown-menu>
+                                            <el-dropdown-item command="csv" :icon="Document">导出 CSV</el-dropdown-item>
+                                            <el-dropdown-item command="json" :icon="Document">导出 JSON</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </template>
+                                </el-dropdown>
+                                <el-button type="primary" :icon="Share" @click="openShareModal" size="small">分享</el-button>
                             </div>
                         </div>
                     </template>
 
                     <el-card shadow="never">
                         <!-- 月份选择和显示控制 -->
-                        <el-row :gutter="20" align="middle" style="margin-bottom: 20px;">
-                            <el-col :span="6">
-                                <el-form-item label="选择年月:">
+                        <el-row :gutter="20" align="middle" style="margin-bottom: 20px;" class="month-control-row">
+                            <el-col :span="12" class="month-selector-col">
+                                <el-form-item label="选择年月:" class="month-selector-form">
                                     <el-date-picker
                                         v-model="currentMonth"
                                         type="month"
@@ -467,20 +861,20 @@
                                     </el-date-picker>
                                 </el-form-item>
                             </el-col>
-                            <el-col :span="6">
-                                <el-form-item label="显示设置:">
-                                    <el-radio-group v-model="showWeekends" @change="onWeekendDisplayChange">
-                                        <el-radio :label="true">显示周末</el-radio>
-                                        <el-radio :label="false">隐藏周末</el-radio>
+                            <el-col :span="12" class="weekend-display-col">
+                                <el-form-item label="是否显示周末:" class="weekend-display-form">
+                                    <el-radio-group v-model="showWeekends" @change="onWeekendDisplayChange" class="weekend-radio-group">
+                                        <el-radio :label="true" class="weekend-radio">显示</el-radio>
+                                        <el-radio :label="false" class="weekend-radio">隐藏</el-radio>
                                     </el-radio-group>
                                 </el-form-item>
                             </el-col>
                         </el-row>
 
-                        <!-- 管理功能 - 合并到一行 -->
-                        <el-row :gutter="20" style="margin-bottom: 20px;">
+                        <!-- 管理功能 - 响应式布局 -->
+                        <el-row :gutter="20" style="margin-bottom: 20px;" class="management-row-mobile">
                             <!-- 人员管理 -->
-                            <el-col :span="12">
+                            <el-col :span="12" class="management-col-mobile">
                                 <el-form-item label="人员管理:">
                                     <el-row :gutter="8">
                                         <el-col :span="12">
@@ -503,7 +897,7 @@
                             </el-col>
 
                             <!-- 项目管理 -->
-                            <el-col :span="12">
+                            <el-col :span="12" class="management-col-mobile">
                                 <el-form-item label="项目管理:">
                                     <el-row :gutter="8">
                                         <el-col :span="12">
@@ -577,31 +971,32 @@
                         </div>
                     </div>
                 </template>
-                <el-table
-                    :data="employees"
-                    border
-                    stripe
-                    size="small"
-                    style="width: 100%"
-                    height="800">
-                    
-                    <!-- 姓名列 -->
-                    <el-table-column
-                        prop="name"
-                        label="姓名"
-                        width="120"
-                        fixed="left"
-                        class-name="name-column">
-                    </el-table-column>
-                    
-                    <!-- 日期列 -->
-                    <el-table-column
-                        v-for="day in daysInMonth"
-                        :key="day"
-                        :label="formatDateHeader(day)"
-                        width="90"
-                        align="center"
-                        :class-name="isWeekend(day) ? 'weekend-header' : ''">
+                <div class="table-container">
+                    <el-table
+                        :data="employees"
+                        border
+                        stripe
+                        size="small"
+                        style="width: 100%"
+                        height="800">
+
+                        <!-- 姓名列 -->
+                        <el-table-column
+                            prop="name"
+                            label="姓名"
+                            width="100"
+                            fixed="left"
+                            class-name="name-column employee-name-column">
+                        </el-table-column>
+
+                        <!-- 日期列 -->
+                        <el-table-column
+                            v-for="day in daysInMonth"
+                            :key="day"
+                            :label="formatDateHeader(day)"
+                            width="100"
+                            align="center"
+                            :class-name="(isWeekend(day) ? 'weekend-header' : '') + ' date-column-mobile'">
                         <template #default="{ row }">
                             <div :class="{ 'weekend-cell': isWeekend(day) }" class="timesheet-cell">
                                 <el-select
@@ -629,7 +1024,8 @@
                             </div>
                         </template>
                     </el-table-column>
-                </el-table>
+                    </el-table>
+                </div>
             </el-card>
             
             <!-- 人员和项目列表 -->
